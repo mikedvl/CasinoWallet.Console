@@ -27,7 +27,7 @@ internal class Program
 
         try
         {
-           // Log.Information("Starting CasinoWallet...");
+            Log.Information("Starting CasinoWallet...");
 
             var builder = Host.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration(config =>
@@ -42,10 +42,10 @@ internal class Program
                 {
                     // Infrastructure
                     services.AddSingleton<IRandomProvider, RandomProvider>();
+                    
+                    // Application
                     services.AddSingleton<IWalletService, WalletService>();
                     services.AddSingleton<IGameService, GameService>();
-
-                    // Application UseCases
                     services.AddTransient<DepositCommand>();
                     services.AddTransient<WithdrawCommand>();
                     services.AddTransient<BetCommand>();

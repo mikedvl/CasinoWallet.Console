@@ -10,6 +10,18 @@ public class GameService(IRandomProvider randomProvider) : IGameService
 {
     private readonly IRandomProvider _random = randomProvider ?? throw new ArgumentNullException(nameof(randomProvider));
 
+    // Win probability thresholds (must sum up to 1.0 or less)
+    private const double LoseThreshold = 0.5;      // 50% lose
+    private const double SmallWinThreshold = 0.9;    // 40% small win
+    // Remaining 10% is big win
+
+    // Multiplier ranges
+    private const double SmallWinMinMultiplier = 1.0;
+    private const double SmallWinMaxMultiplier = 2.0;
+
+    private const double BigWinMinMultiplier = 2.0;
+    private const double BigWinMaxMultiplier = 10.0;
+
     public decimal GenerateWin(decimal betAmount)
     {
         if (betAmount <= 0)
@@ -19,17 +31,19 @@ public class GameService(IRandomProvider randomProvider) : IGameService
 
         switch (roll)
         {
-            case < 0.5:
-                return 0m; // 50% chance to lose
-            case < 0.9:
+            case < LoseThreshold:
+                return 0m; // Lose
+            case < SmallWinThreshold:
             {
-                double multiplier = 1.0 + _random.NextDouble(); // 40% chance, x1.0–x2.0
+                // Small win: multiplier between 1.0 and 2.0
+                double multiplier = SmallWinMinMultiplier + _random.NextDouble() * (SmallWinMaxMultiplier - SmallWinMinMultiplier);
                 return Math.Round(betAmount * (decimal)multiplier, 2);
             }
             default:
             {
-                double multiplier = 2.0 + _random.NextDouble() * 8.0; // 10% chance, x2.0–x10.0
-                return Math.Round(betAmount * (decimal)multiplier, 2);
+                // Big win: multiplier between 2.0 and 10.0
+                double bigMultiplier = BigWinMinMultiplier + _random.NextDouble() * (BigWinMaxMultiplier - BigWinMinMultiplier);
+                return Math.Round(betAmount * (decimal)bigMultiplier, 2);
             }
         }
     }
